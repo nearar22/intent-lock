@@ -49,11 +49,12 @@ Contract source: [`contracts/intent_lock.py`](contracts/intent_lock.py)
 
 Studio Next deployment:
 
+- Live app: [intent-lock.pages.dev](https://intent-lock.pages.dev/)
 - Contract: [`0x65D35C6e8Ff62235c49e08845D671e13E7feb651`](https://explorer-studio-dev.genlayer.com/address/0x65D35C6e8Ff62235c49e08845D671e13E7feb651)
 - Deploy transaction: [`0xbfa3...6b66`](https://explorer-studio-dev.genlayer.com/tx/0xbfa3bf25cef7c9514bfdd7f61a0675c4b833891191764a9747e4efbf9ad06b66)
 - Live semantic collision: [`0xad25...cd9d`](https://explorer-studio-dev.genlayer.com/tx/0xad25875b53d600e5bfcd31315e52c783c7bb082a3afd4120841823b49ccdcd9d)
 
-The live collision transaction finalized with `FINISHED_WITH_RETURN`. Its stored result classifies the paraphrase as `DUPLICATE`, sets `BLOCKED_DUPLICATE`, and links it to `agent-tank-demo-1`. Full machine-readable evidence is in [`deployment.json`](deployment.json).
+The live collision transaction finalized with `FINISHED_WITH_RETURN`. Its stored result classifies the paraphrase as `DUPLICATE`, sets `BLOCKED_DUPLICATE`, and links it to `agent-tank-demo-1`. A distinct hotel intent was then reserved and consumed on-chain, so the public control tower visibly shows the cleared, collision, and landed states together. Full machine-readable evidence is in [`deployment.json`](deployment.json).
 
 ## Run and verify
 

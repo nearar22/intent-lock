@@ -16,7 +16,7 @@ This matrix is the stop gate for the Agent Tank build. A row stays UNVERIFIED un
 | Repository builds from a clean install | Root and `frontend` | frontend 9/9 tests and production build | VERIFIED |
 | Frontend uses real Studio Next contract calls and fee flow | `frontend` | Local browser reads both live intents with zero console errors | VERIFIED |
 | Reviewed source equals deployed source | `deployment.json` plus deploy receipt | SHA-256 `91ad0847...ea564` | VERIFIED |
-| Public deployment completes the real lifecycle | public site | Fresh reserve, blocked paraphrase, consume | UNVERIFIED |
+| Public deployment completes the real lifecycle | `https://intent-lock.pages.dev` | Live reserve, blocked paraphrase, distinct hotel, and consumed lease | VERIFIED |
 
 ## Originality check
 

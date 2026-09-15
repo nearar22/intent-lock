@@ -3,19 +3,24 @@
   "chainId": 61997,
   "rpcUrl": "https://studio-next.genlayer.com/api",
   "explorerUrl": "https://explorer-studio-dev.genlayer.com",
+  "frontendUrl": "https://intent-lock.pages.dev",
   "contractAddress": "0x65D35C6e8Ff62235c49e08845D671e13E7feb651",
   "contractSourceSha256": "91ad08478645d7e586ac36404c6b90ad4480b7a16b14dab60bfd3ed5593ea564",
   "deploymentTransaction": "0xbfa3bf25cef7c9514bfdd7f61a0675c4b833891191764a9747e4efbf9ad06b66",
   "liveProof": {
     "createWorkspace": "0x4f4900a5b27b8457eecfa8738f91e4a02697d6bf887fb5847b699308eca33be7",
     "reserveDistinctIntent": "0xc38f7024db2b4039d91004675fb9eb23598780612dbb84fd5e800ebfb1460209",
-    "blockParaphrasedDuplicate": "0xad25875b53d600e5bfcd31315e52c783c7bb082a3afd4120841823b49ccdcd9d"
+    "blockParaphrasedDuplicate": "0xad25875b53d600e5bfcd31315e52c783c7bb082a3afd4120841823b49ccdcd9d",
+    "reserveDistinctHotel": "0x1eb6651ca76b1b7b33b45c0916f8fdcea5a3309e948703655821f791424c0ef3",
+    "consumeHotelLease": "0x3810b30dff19767185307a679339037ef072be2c4951d8eba1106c257adad53d"
   },
   "verifiedOutcome": {
     "originalIntent": "agent-tank-demo-1",
     "originalStatus": "RESERVED",
     "paraphrasedIntent": "agent-tank-demo-2",
     "paraphrasedStatus": "BLOCKED_DUPLICATE",
-    "duplicateOf": "agent-tank-demo-1"
+    "duplicateOf": "agent-tank-demo-1",
+    "consumedIntent": "agent-tank-demo-3",
+    "consumedStatus": "EXECUTED"
   }
 }
