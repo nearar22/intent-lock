@@ -1,0 +1,17 @@
+{
+  "name": "intent-lock",
+  "type": "module",
+  "private": true,
+  "workspaces": ["frontend"],
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "start": "cd frontend && npm run start",
+    "lint": "cd frontend && npm run lint",
+    "test:contract": "python -m pytest tests/direct -q",
+    "deploy": "node scripts/deploy-next.mjs"
+  },
+  "devDependencies": {
+    "genlayer-js": "2.0.0-rc.1"
+  }
+}

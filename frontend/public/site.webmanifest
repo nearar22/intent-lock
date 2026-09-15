@@ -1,0 +1,16 @@
+{
+  "name": "IntentLock",
+  "short_name": "IntentLock",
+  "description": "One semantic intent, one execution across autonomous agents",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#06100d",
+  "theme_color": "#54f5b2",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
