@@ -11,13 +11,13 @@ This matrix is the stop gate for the Agent Tank build. A row stays UNVERIFIED un
 | Request IDs cannot be replayed | `used_requests` | Duplicate request test | VERIFIED |
 | A cleared execution lease is single use and bound to its executor | `consume_intent` | Wrong executor and double consume tests | VERIFIED |
 | Reservations cannot remain stuck | `expire_intent`, `cancel_intent`, `resolve_review` | Permissionless expiry and owner recovery tests | VERIFIED |
-| Submitted application exposes owner ambiguity recovery | `frontend/app/page.tsx`, `frontend/lib/intent-lock/review.ts` | Frontend transaction tests cover DISTINCT, DUPLICATE, target binding, and missing-target rejection | VERIFIED LOCALLY, LIVE PROOF PENDING |
+| Submitted application exposes owner ambiguity recovery | `frontend/app/page.tsx`, `frontend/lib/intent-lock/review.ts` | 3 focused transaction tests plus production bundle proof at frontend revision `cf6c187` | VERIFIED |
 | Candidate comparison is bounded without silently skipping live intents | `_candidates` | Saturated window test | VERIFIED |
 | Contract source lints and pickles | Entire contract | GenVM lint 3/3 and direct deploy | VERIFIED |
 | Repository builds from a clean install | Root and `frontend` | frontend 12/12 tests and production build | VERIFIED |
 | Frontend uses real Studio Next contract calls and fee flow | `frontend` | Local browser reads both live intents with zero console errors | VERIFIED |
 | Reviewed source equals deployed source | `deployment.json` plus deploy receipt | SHA-256 `91ad0847...ea564` | VERIFIED |
-| Public deployment completes the real lifecycle | `https://intent-lock.pages.dev` | Live reserve, blocked paraphrase, distinct hotel, and consumed lease | VERIFIED |
+| Public deployment completes the real lifecycle | `https://intent-lock.pages.dev` | Live reserve, blocked paraphrase, distinct hotel, consumed lease, and deployed owner recovery action | VERIFIED |
 
 ## Originality check
 

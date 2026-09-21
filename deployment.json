@@ -4,6 +4,8 @@
   "rpcUrl": "https://studio-next.genlayer.com/api",
   "explorerUrl": "https://explorer-studio-dev.genlayer.com",
   "frontendUrl": "https://intent-lock.pages.dev",
+  "frontendRevision": "cf6c187",
+  "frontendDeployment": "https://f38375a9.intent-lock.pages.dev",
   "contractAddress": "0x65D35C6e8Ff62235c49e08845D671e13E7feb651",
   "contractSourceSha256": "91ad08478645d7e586ac36404c6b90ad4480b7a16b14dab60bfd3ed5593ea564",
   "deploymentTransaction": "0xbfa3bf25cef7c9514bfdd7f61a0675c4b833891191764a9747e4efbf9ad06b66",
