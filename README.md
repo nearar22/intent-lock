@@ -31,7 +31,7 @@ Every validator independently receives the full proposed action and candidate se
 4. GenLayer consensus returns `DISTINCT`, `DUPLICATE`, or `AMBIGUOUS`.
 5. `DISTINCT` creates a 60-second to 24-hour execution lease bound to the submitting wallet.
 6. `DUPLICATE` is blocked and linked to the exact original.
-7. `AMBIGUOUS` fails safe in `REVIEW_REQUIRED`; only the principal can resolve it.
+7. `AMBIGUOUS` fails safe in `REVIEW_REQUIRED`. Its collision card gives the principal a source-level action to choose `DISTINCT` or `DUPLICATE`, select the exact original when required, and call `resolve_review` through Transaction Kit.
 8. The bound executor consumes a lease exactly once. Anyone may expire an elapsed lease. The principal or executor may cancel an open intent.
 
 ## Contract API
@@ -86,7 +86,7 @@ The direct suite covers semantic paraphrase collisions, exact duplicate linkage,
 
 ## Interface
 
-The product uses an air-traffic-control board rather than exposing raw contract arguments as a table. Live on-chain intents move through `CLEARED`, `COLLISION`, and `LANDED` lanes. Demo presets remain editable and submit the same real contract transaction as custom actions.
+The product uses an air-traffic-control board rather than exposing raw contract arguments as a table. Live on-chain intents move through `CLEARED`, `COLLISION`, and `LANDED` lanes. A `REVIEW_REQUIRED` collision exposes the owner resolution, eligible duplicate target, and lease controls on its card. The signed action calls `resolve_review` and waits for finalization before refreshing authoritative state. Demo presets remain editable and submit the same real contract transaction as custom actions.
 
 ## Limits and safety
 

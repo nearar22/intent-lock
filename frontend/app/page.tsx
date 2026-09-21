@@ -8,6 +8,7 @@ import { AccountPanel } from "@/components/AccountPanel";
 import { GENLAYER_NETWORK, createGenLayerClient, getContractAddress } from "@/lib/genlayer/client";
 import { useTransactionKit } from "@/lib/genlayer/kit";
 import { useWallet } from "@/lib/genlayer/wallet";
+import { buildReviewTransaction, type ReviewResolution } from "@/lib/intent-lock/review";
 
 type Intent = {
   id: string; request_id: string; executor: string; target: string; action: string;
@@ -43,8 +44,12 @@ export default function HomePage() {
   const [action, setAction] = useState(presets[0].action);
   const [constraints, setConstraints] = useState(presets[0].constraints);
   const [windowKey, setWindowKey] = useState("paris-friday");
-  const [activeTx, setActiveTx] = useState<"workspace" | "agent" | "intent" | "consume" | null>(null);
+  const [activeTx, setActiveTx] = useState<"workspace" | "agent" | "intent" | "consume" | "review" | null>(null);
   const [consumeId, setConsumeId] = useState("");
+  const [reviewId, setReviewId] = useState("");
+  const [reviewResolution, setReviewResolution] = useState<ReviewResolution>("DISTINCT");
+  const [reviewDuplicateOf, setReviewDuplicateOf] = useState("");
+  const [reviewLease, setReviewLease] = useState(900);
 
   const client = useMemo(() => createGenLayerClient(wallet.address || undefined), [wallet.address]);
   const intentsQuery = useQuery<Intent[]>({
@@ -59,8 +64,15 @@ export default function HomePage() {
     if (activeTx === "workspace") return { ...base, method: "create_workspace", args: [workspace, workspaceName] };
     if (activeTx === "agent") return { ...base, method: "set_agent", args: [workspace, agent, true] };
     if (activeTx === "consume") return { ...base, method: "consume_intent", args: [consumeId] };
+    if (activeTx === "review") return buildReviewTransaction({
+      contractAddress: contractAddress as `0x${string}`,
+      intentId: reviewId,
+      resolution: reviewResolution,
+      duplicateOf: reviewDuplicateOf,
+      leaseSeconds: reviewLease,
+    });
     return { ...base, method: "submit_intent", args: [workspace, requestId, target, action, constraints, windowKey, 900] };
-  }, [activeTx, contractAddress, workspace, workspaceName, agent, requestId, target, action, constraints, windowKey, consumeId]);
+  }, [activeTx, contractAddress, workspace, workspaceName, agent, requestId, target, action, constraints, windowKey, consumeId, reviewId, reviewResolution, reviewDuplicateOf, reviewLease]);
 
   const done = (status: TrackedStatus) => {
     if (status.phase === "finalized" && status.successful === true) {
@@ -80,7 +92,7 @@ export default function HomePage() {
     <header className="topbar"><a className="wordmark" href="#top"><span className="mark"><Radar size={20}/></span> INTENTLOCK</a><div className="network"><i/> STUDIO NEXT · 61997</div><AccountPanel/></header>
     <section id="top" className="hero"><div className="eyebrow">SEMANTIC CONCURRENCY CONTROL FOR AUTONOMOUS AGENTS</div><h1>One intent.<br/><span>One execution.</span></h1><p>Stop two agents from causing the same real-world effect, even when their requests look completely different.</p><div className="hero-proof"><ShieldCheck size={18}/> GenLayer validators compare meaning before an irreversible tool call receives clearance.</div></section>
     <section className="control-room"><div className="control-head"><div><span className="section-no">01</span><h2>Control tower</h2><p>Every card below is read from the deployed contract.</p></div><button className="refresh" onClick={() => intentsQuery.refetch()}><CircleDot size={15}/> Refresh chain</button></div>
-      <div className="lanes"><Lane title="CLEARED" subtitle="Single-use execution leases" tone="green" items={cleared} onConsume={(id) => {setConsumeId(id);setActiveTx("consume");}}/><Lane title="COLLISION" subtitle="Duplicate or unsafe to decide" tone="red" items={blocked}/><Lane title="LANDED" subtitle="Executed and closed operations" tone="blue" items={landed}/></div>
+      <div className="lanes"><Lane title="CLEARED" subtitle="Single-use execution leases" tone="green" items={cleared} onConsume={(id) => {setConsumeId(id);setActiveTx("consume");}}/><Lane title="COLLISION" subtitle="Duplicate or unsafe to decide" tone="red" items={blocked} allIntents={intents} onResolve={(id,resolution,duplicateOf,leaseSeconds) => {setReviewId(id);setReviewResolution(resolution);setReviewDuplicateOf(duplicateOf);setReviewLease(leaseSeconds);setActiveTx("review");}}/><Lane title="LANDED" subtitle="Executed and closed operations" tone="blue" items={landed}/></div>
       {!contractAddress && <div className="empty-state"><AlertTriangle size={18}/> Contract address is not configured yet. The board becomes live after Studio Next deployment.</div>}
       {contractAddress && intentsQuery.isError && <div className="empty-state"><Clock3 size={18}/> Create this workspace first, then refresh the board.</div>}
       {contractAddress && !intentsQuery.isError && !intents.length && <div className="empty-state"><Radar size={18}/> No traffic in this workspace yet. Clear the first intent below.</div>}
@@ -90,11 +102,21 @@ export default function HomePage() {
       <button className="primary-action" disabled={!kit||!contractAddress} onClick={()=>setActiveTx("intent")}><Radar size={18}/> Ask validators for clearance</button>
     </section>
     <section className="setup"><div><span className="section-no">03</span><h2>Workspace setup</h2><p>The creator is the principal. Only the principal can authorize agent wallets or resolve ambiguous traffic.</p></div><div className="setup-actions"><label>Workspace name<input value={workspaceName} onChange={e=>setWorkspaceName(e.target.value)}/></label><button onClick={()=>setActiveTx("workspace")}>Create workspace</button><label>Agent wallet<input placeholder="0x..." value={agent} onChange={e=>setAgent(e.target.value)}/></label><button disabled={!agent.startsWith("0x")} onClick={()=>setActiveTx("agent")}>Authorize agent</button></div></section>
-    {activeTx&&tx&&kit&&<div className="tx-drawer"><div className="tx-head"><div><span>TRANSACTION CHECKPOINT</span><h3>{activeTx==="intent"?"Consensus clearance":activeTx==="consume"?"Consume execution lease":"Workspace authorization"}</h3></div><button onClick={()=>setActiveTx(null)}><X/></button></div><GenLayerTransactionPanel kit={kit} tx={tx} network={GENLAYER_NETWORK.chainName} theme="dark" trackUntil="finalized" onDone={done}/></div>}
+    {activeTx&&tx&&kit&&<div className="tx-drawer"><div className="tx-head"><div><span>TRANSACTION CHECKPOINT</span><h3>{activeTx==="intent"?"Consensus clearance":activeTx==="consume"?"Consume execution lease":activeTx==="review"?"Owner review resolution":"Workspace authorization"}</h3></div><button onClick={()=>setActiveTx(null)}><X/></button></div><GenLayerTransactionPanel kit={kit} tx={tx} network={GENLAYER_NETWORK.chainName} theme="dark" trackUntil="finalized" onDone={done}/></div>}
     <footer><span>IntentLock · Agent Tank 2026</span><span>Semantic judgment on GenLayer Studio Next</span></footer>
   </main>;
 }
 
-function Lane({title,subtitle,tone,items,onConsume}:{title:string;subtitle:string;tone:string;items:Intent[];onConsume?:(id:string)=>void}) {
-  return <div className={`lane ${tone}`}><div className="lane-head"><div><b>{title}</b><span>{subtitle}</span></div><strong>{items.length.toString().padStart(2,"0")}</strong></div><div className="lane-track">{items.map(item=><article className="intent-card" key={item.id}><div className="card-top"><code>{item.id}</code><span>{item.relation}</span></div><h3>{item.action}</h3><p>{item.constraints}</p>{item.duplicate_of&&<div className="collision"><AlertTriangle size={14}/> conflicts with <b>{item.duplicate_of}</b></div>}<div className="card-foot"><span>{shorten(item.executor)}</span>{item.status==="RESERVED"&&onConsume?<button onClick={()=>onConsume(item.id)}><PlaneLanding size={14}/> Mark executed</button>:<span>{item.status}</span>}</div></article>)}{!items.length&&<div className="lane-empty"><div/><span>NO SIGNAL</span></div>}</div></div>;
+function Lane({title,subtitle,tone,items,allIntents=[],onConsume,onResolve}:{title:string;subtitle:string;tone:string;items:Intent[];allIntents?:Intent[];onConsume?:(id:string)=>void;onResolve?:(id:string,resolution:ReviewResolution,duplicateOf:string,leaseSeconds:number)=>void}) {
+  return <div className={`lane ${tone}`}><div className="lane-head"><div><b>{title}</b><span>{subtitle}</span></div><strong>{items.length.toString().padStart(2,"0")}</strong></div><div className="lane-track">{items.map(item=><IntentCard key={item.id} item={item} allIntents={allIntents} onConsume={onConsume} onResolve={onResolve}/>)}{!items.length&&<div className="lane-empty"><div/><span>NO SIGNAL</span></div>}</div></div>;
+}
+
+function IntentCard({item,allIntents,onConsume,onResolve}:{item:Intent;allIntents:Intent[];onConsume?:(id:string)=>void;onResolve?:(id:string,resolution:ReviewResolution,duplicateOf:string,leaseSeconds:number)=>void}) {
+  const [resolution,setResolution]=useState<ReviewResolution>("DISTINCT");
+  const [duplicateOf,setDuplicateOf]=useState("");
+  const [leaseSeconds,setLeaseSeconds]=useState(900);
+  const candidates=allIntents.filter(candidate=>candidate.id!==item.id&&candidate.window_key===item.window_key&&["RESERVED","EXECUTED"].includes(candidate.status));
+  const canResolve=resolution==="DISTINCT"||Boolean(duplicateOf);
+  const validLease=Number.isInteger(leaseSeconds)&&leaseSeconds>=60&&leaseSeconds<=86400;
+  return <article className="intent-card"><div className="card-top"><code>{item.id}</code><span>{item.relation}</span></div><h3>{item.action}</h3><p>{item.constraints}</p>{item.duplicate_of&&<div className="collision"><AlertTriangle size={14}/> conflicts with <b>{item.duplicate_of}</b></div>}{item.status==="REVIEW_REQUIRED"&&onResolve&&<div className="review-resolution"><b>OWNER DECISION REQUIRED</b><label>Resolution<select aria-label={`Resolution for ${item.id}`} value={resolution} onChange={event=>{const next=event.target.value as ReviewResolution;setResolution(next);if(next==="DISTINCT")setDuplicateOf("");}}><option value="DISTINCT">Clear as distinct</option><option value="DUPLICATE">Block as duplicate</option></select></label>{resolution==="DUPLICATE"&&<label>Original intent<select aria-label={`Duplicate target for ${item.id}`} value={duplicateOf} onChange={event=>setDuplicateOf(event.target.value)}><option value="">Select eligible original</option>{candidates.map(candidate=><option key={candidate.id} value={candidate.id}>{candidate.id}: {candidate.action.slice(0,34)}</option>)}</select></label>}<label>Lease seconds<input aria-label={`Lease seconds for ${item.id}`} type="number" min={60} max={86400} value={leaseSeconds} onChange={event=>setLeaseSeconds(Number(event.target.value))}/></label><button disabled={!canResolve||!validLease} onClick={()=>onResolve(item.id,resolution,duplicateOf,leaseSeconds)}>Resolve onchain</button><small>Only the workspace owner can sign this action.</small></div>}<div className="card-foot"><span>{shorten(item.executor)}</span>{item.status==="RESERVED"&&onConsume?<button onClick={()=>onConsume(item.id)}><PlaneLanding size={14}/> Mark executed</button>:<span>{item.status}</span>}</div></article>;
 }

@@ -95,7 +95,28 @@ def test_ambiguous_fails_safe_and_owner_can_recover(direct_vm, direct_deploy, di
         contract.resolve_review(review_id, "DISTINCT", "", 900)
     direct_vm.sender = direct_alice
     contract.resolve_review(review_id, "DISTINCT", "", 900)
-    assert contract.get_intent(review_id)["status"] == "RESERVED"
+    resolved = contract.get_intent(review_id)
+    assert resolved["status"] == "RESERVED"
+    assert resolved["relation"] == "DISTINCT"
+    assert resolved["duplicate_of"] == ""
+
+
+def test_owner_can_resolve_ambiguous_as_exact_duplicate(direct_vm, direct_deploy, direct_alice, direct_bob):
+    contract = setup_workspace(direct_vm, direct_deploy, direct_alice, direct_bob)
+    original = submit_first(contract, direct_vm, direct_bob)
+    producer(direct_vm, "AMBIGUOUS")
+    review_id = contract.submit_intent(
+        "travel-ops", "req-review-copy", "travel",
+        "Arrange the trip again with unclear details",
+        "Use the previous limits", "paris-friday", 900,
+    )
+    direct_vm.clear_mocks()
+    direct_vm.sender = direct_alice
+    contract.resolve_review(review_id, "DUPLICATE", original, 900)
+    resolved = contract.get_intent(review_id)
+    assert resolved["status"] == "BLOCKED_DUPLICATE"
+    assert resolved["relation"] == "DUPLICATE"
+    assert resolved["duplicate_of"] == original
 
 
 def test_authorization_replay_cancellation_and_permissionless_expiry(direct_vm, direct_deploy, direct_alice, direct_bob, direct_charlie):
